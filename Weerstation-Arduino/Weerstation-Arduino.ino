@@ -20,6 +20,9 @@ DHT dht(DHTPIN, DHTTYPE);
 //voor de luchtdruksensor
 Adafruit_BMP085 bmp;
 
+//regensensor
+#define sensor_DO A0
+
 //zorgt voor interval tussen verschillende schermen
 int draw_state = 0;
 
@@ -41,31 +44,38 @@ void loop() {
   float t = dht.readTemperature();
   float h = dht.readHumidity();
   float p = bmp.readPressure()/(float)100;
+  int val = digitalRead(sensor_DO);
   //zorgt ervoor dat de draw_state oploopt
   draw_state++;
   //reset de draw_state
- if ( draw_state > 5  ){
+ if ( draw_state > 7  ){
     draw_state = 0;
   }
   // wisselt draw_state na delay
   delay(1500);
 
   switch(draw_state) {
+    //regensensor
     case 0:
-      display.clearDisplay(); 
+      display.clearDisplay();
       display.setTextSize(1);
-      display.setCursor(10,0);
-      display.print("Luchtvochtigheid");
+      display.setCursor(45,0);
+      display.print("Regen");
       display.setTextSize(1);
       display.setCursor(110,0);
-      display.print("2/4");
+      display.print("4/4");
+      if (val == 1) {
+      display.setTextSize(2);  
+      display.setCursor(56,32);  
+      display.print("Droog");
+      } 
+      else {
       display.setTextSize(2);
-      display.setCursor(56,32);
-      display.print(h, 1);
-      display.setTextSize(2);
-      display.setCursor(110,32);
-      display.print("%");
+      display.setCursor(56,32);  
+      display.print("Regen");
+      }
       break;
+      //temperatuur
     case 2:
       display.clearDisplay(); 
       display.drawCircle(107, 30, 3, WHITE);
@@ -82,7 +92,24 @@ void loop() {
       display.setCursor(56,32);
       display.print(t, 1); 
       break;
+      //luchtvochtigheid
     case 4:
+      display.clearDisplay(); 
+      display.setTextSize(1);
+      display.setCursor(10,0);
+      display.print("Luchtvochtigheid");
+      display.setTextSize(1);
+      display.setCursor(110,0);
+      display.print("2/4");
+      display.setTextSize(2);
+      display.setCursor(56,32);
+      display.print(h, 1);
+      display.setTextSize(2);
+      display.setCursor(110,32);
+      display.print("%");
+      break;
+      //luchtdruk
+    case 6:
       display.clearDisplay(); 
       display.setTextSize(1);
       display.setCursor(30,0);
