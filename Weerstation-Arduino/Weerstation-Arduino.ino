@@ -3,6 +3,7 @@
 #include <Adafruit_SSD1306.h>
 #include <Adafruit_Sensor.h>
 #include "DHT.h"
+#include <Adafruit_BMP085.h>
 
 //voor het scherm
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
@@ -16,6 +17,9 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 #define DHTTYPE    DHT22
 DHT dht(DHTPIN, DHTTYPE);
 
+//voor de luchtdruksensor
+Adafruit_BMP085 bmp;
+
 //zorgt voor interval tussen verschillende schermen
 int draw_state = 0;
 
@@ -23,6 +27,7 @@ int draw_state = 0;
 void setup() {
   Serial.begin(115200);
   dht.begin();
+  bmp.begin();
   display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
   delay(2000);
   display.clearDisplay();
@@ -35,10 +40,11 @@ void loop() {
   //haalt de data op
   float t = dht.readTemperature();
   float h = dht.readHumidity();
+  float p = bmp.readPressure()/(float)100;
   //zorgt ervoor dat de draw_state oploopt
   draw_state++;
   //reset de draw_state
- if ( draw_state > 3  ){
+ if ( draw_state > 5  ){
     draw_state = 0;
   }
   // wisselt draw_state na delay
@@ -75,6 +81,18 @@ void loop() {
       display.setTextSize(2);
       display.setCursor(56,32);
       display.print(t, 1); 
+      break;
+    case 4:
+      display.clearDisplay(); 
+      display.setTextSize(1);
+      display.setCursor(30,0);
+      display.print("Luchtdruk");
+      display.setTextSize(1);
+      display.setCursor(110,0);
+      display.print("3/4");
+      display.setTextSize(2);
+      display.setCursor(56,32);
+      display.print(p, 1);
       break;
   }
 
