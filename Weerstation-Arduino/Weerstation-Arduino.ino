@@ -4,6 +4,26 @@
 #include <Adafruit_Sensor.h>
 #include "DHT.h"
 #include <Adafruit_BMP085.h>
+#include "arduino_secrets.h"
+#include <ArduinoMqttClient.h>
+#include <WiFiS3.h>
+
+//connecten met wifi en MQTT en data doorsturen
+char          ssid[] = SECRET_SSID;
+char          pass[] = SECRET_PASS; 
+WiFiClient    wifiClient;
+MqttClient    mqttClient(wifiClient);
+const char    broker[]         = "192.168.144.1"; //"192.168.122.1";
+const int     port             = 1883;
+const char    topic[]          = "dionstroet/temperatuur";
+const char    topic2[]          = "dionstroet/luchtvochtigheid";
+const char    topic3[]          = "dionstroet/luchtdruk";
+const char    topic4[]          = "dionstroet/regen";
+const char    subscribeTopic[] = "rensbroersma/moisture";
+long          count            = 0;
+const long    drawinterval     = 1500;
+const long    interval         = 10000; //tijd tussen zendingen
+unsigned long previousMillis   = 0;
 
 //voor het scherm
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
@@ -147,10 +167,25 @@ void setup() {
   display.clearDisplay();
   display.setTextColor(WHITE);
   display.display();
+  //voor wifi/MQTT
+  while (WiFi.begin(ssid, pass) != WL_CONNECTED) {
+   delay(5000);
+  }
+  Serial.print("wifi conected");
+
+  bool MQTTconnected = false;
+  while (!MQTTconnected) {  
+  if (!mqttClient.connect(broker, port)) delay(1000);
+   else
+      MQTTconnected = true;
+  }
+  Serial.print("mqtt connected");
 
 }
 
 void loop() {
+  //MQTT
+  mqttClient.poll();
   //haalt de data op
   float t = dht.readTemperature();
   float h = dht.readHumidity();
@@ -242,5 +277,28 @@ void loop() {
    //tekent een lijn en zorgt ervoor dat het scherm aangaat
   display.drawLine(0,10,128,10, WHITE);
   display.display();
+
+  //tijd tussen versturingen
+  unsigned long currentMillis = millis();
+   if (currentMillis - previousMillis >= interval) {
+   previousMillis = currentMillis;
+
+   //naam geven aan data
+   mqttClient.beginMessage(topic,true,0);
+   mqttClient.print(t);
+   mqttClient.endMessage();
+   mqttClient.beginMessage(topic2,true,0);
+   mqttClient.print(h);
+   mqttClient.endMessage();
+   mqttClient.beginMessage(topic3,true,0);
+   mqttClient.print(p);
+   mqttClient.endMessage();
+   mqttClient.beginMessage(topic4,true,0);
+   mqttClient.print(val);
+   mqttClient.endMessage();
+   
+   delay(1);
+   }
+  }
 
 }
