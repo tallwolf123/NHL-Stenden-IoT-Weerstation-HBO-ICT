@@ -240,7 +240,7 @@ void loop() {
   }
 
    //tekent een lijn en zorgt ervoor dat het scherm aangaat
-   display.drawLine(0,10,128,10, WHITE);
-   display.display();
+  display.drawLine(0,10,128,10, WHITE);
+  display.display();
 
 }
