@@ -26,8 +26,8 @@ const long    interval         = 10000; //tijd tussen zendingen
 unsigned long previousMillis   = 0;
 
 //voor het scherm
-#define SCREEN_WIDTH 128 // OLED display width, in pixels
-#define SCREEN_HEIGHT 64 // OLED display height, in pixels
+#define SCREEN_WIDTH 128 // OLED display breedte, in pixels
+#define SCREEN_HEIGHT 64 // OLED display hppgte, in pixels
  
 #define OLED_RESET -1
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
@@ -301,4 +301,4 @@ void loop() {
    }
   }
 
-}
+
