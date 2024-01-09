@@ -180,6 +180,8 @@ void setup() {
       MQTTconnected = true;
   }
   Serial.print("mqtt connected");
+  mqttClient.subscribe (subscribeTopic);
+  mqttClient.onMessage (onMqttMessage);
 
 }
 
@@ -300,5 +302,17 @@ void loop() {
    delay(1);
    }
   }
+  
+  void onMqttMessage(int messageSize) {
+  Serial.print("Received a message with topic '");
+  Serial.println(mqttClient.messageTopic());
+  int num;
+  String message = "";
+  while (mqttClient.available()) {
+  message.concat((char)mqttClient.read());
+  }
+  Serial.println(message);
+  num = message.toInt();
+}
 
 
